@@ -7,6 +7,9 @@
 # imports framework
 import sys, os
 import numpy as np
+import time
+
+from tqdm import trange
 
 from evoman.environment import Environment
 
@@ -17,7 +20,7 @@ if not os.path.exists(experiment_name):
 # initializes environment with ai player using random controller, playing against static enemy
 env = Environment(
     experiment_name=experiment_name,
-    enemies=[1, 2, 3, 4, 5],
+    enemies=[1, 2, 3, 4, 5, 6, 7, 8],
     visuals=False,
     speed="fastest",
     multiplemode="yes",
@@ -27,15 +30,11 @@ env = Environment(
 # NOTE change fitness by changing
 env.fitness_single
 env.cons_multi = lambda values: values  # Ensure that all values are returned
-v, _, _, _ = env.play()
-print(v)
-print("a")
-print(np.arcsinh(100))
-print(np.arcsinh(10))
-print(np.arcsinh(0))
-print(np.arcsinh(-10))
-print(np.arcsinh(-100))
-print("b")
-print(v.mean())
-print(np.mean(np.arcsinh(v)))
-print(env.get_playerlife())
+# v, _, _, _ = env.play()
+a = np.array([[1, 2, 3], [4, 5, 6]])
+print(a[0])
+
+t = time.time()
+for i in trange(1000):
+    env.play()
+print(time.time() - t)

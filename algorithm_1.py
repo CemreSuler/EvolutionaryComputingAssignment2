@@ -21,6 +21,7 @@ NUM_HIDDEN_NEURONS = 10
 POPULATION_SIZE = 1000
 TRAINING_GENERATIONS = 50
 MUTATION_RATE = 0.2  # NOTE We want to somehow modify this rate I believe
+SELECT_TOP = 100
 ## END OF SETTINGS
 
 
@@ -88,9 +89,9 @@ def select_top_p(x, fitness, p):
 @njit
 def selection_and_generation(x, fitness):
     x_new = np.zeros((POPULATION_SIZE, NUM_VARS))
-    x_new[:100] = select_top_p(x, fitness, 100)  # Select top 100 nodes
+    x_new[:SELECT_TOP] = select_top_p(x, fitness, SELECT_TOP)  # Select top 100 nodes
 
-    for i in range(100, 1000):
+    for i in range(SELECT_TOP, 1000):
         # FIXME for now alpha is just 0.5, but likely we need to randomly generate this or something
         p = np.random.randint(0, 100)
         q = np.random.randint(0, 100)
