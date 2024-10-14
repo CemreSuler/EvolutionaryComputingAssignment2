@@ -110,7 +110,7 @@ def select_top_p(x, fitness, p):
 
 @njit
 def compute_sigma(fitness):
-    return 1 / (2 * max(1, np.max(fitness) / 10))
+    return 1 / (5 * max(1, np.max(fitness) / 10))
 
 
 # FIXME for now we are just randomly selecting from the top 100
