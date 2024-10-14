@@ -18,14 +18,16 @@ import os
 ## SETTINGS
 # PyGame Settings
 HEADLESS = True
-EXPERIMENT_NAME = "Algorithm1"
+EXPERIMENT_NAME = "Algorithm2"
 
 # Model settings
 NUM_HIDDEN_NEURONS = 10
-POPULATION_SIZE = 250
+POPULATION_SIZE = 50  # NOTE population size per island
 TRAINING_GENERATIONS = 50
+SWITCH_ITERATIONS = 10
 MUTATION_RATE = 0.2
-SELECT_TOP = 50  # Selects the top to create offspring, kill this part
+SELECT_TOP = 10  # Selects the top to create offspring, kill this part
+ISLANDS = 5
 
 # Alpha of combination
 MIN_ALPHA = 0.1
@@ -114,30 +116,59 @@ def compute_sigma(fitness):
 # FIXME for now we are just randomly selecting from the top 100
 @njit
 def selection_and_generation(x, fitness):
-    x_new = np.zeros((POPULATION_SIZE, NUM_VARS))
-    x_new[: POPULATION_SIZE - SELECT_TOP] = select_top_p(
-        x, fitness, POPULATION_SIZE - SELECT_TOP
-    )
-    sigma_i = compute_sigma(fitness)
+    x_new = np.zeros((POPULATION_SIZE * ISLANDS, NUM_VARS))
 
-    for i in range(POPULATION_SIZE - SELECT_TOP, POPULATION_SIZE):
-        p = np.random.randint(0, SELECT_TOP)
-        q = np.random.randint(0, SELECT_TOP)
-        alpha = np.random.uniform(MIN_ALPHA, MAX_ALPHA)
-        x_new[i] = single_crossover(x_new[p], x_new[q], alpha)
+    for i in range(ISLANDS):
+        x_new[
+            i * POPULATION_SIZE : i * POPULATION_SIZE + POPULATION_SIZE - SELECT_TOP
+        ] = select_top_p(
+            x[i * POPULATION_SIZE : (i + 1) * POPULATION_SIZE],
+            fitness[i * POPULATION_SIZE : (i + 1) * POPULATION_SIZE],
+            POPULATION_SIZE - SELECT_TOP,
+        )
+        sigma_i = compute_sigma(fitness)
 
-        x_new[i] = single_mutation(x_new[i], MUTATION_RATE, sigma_i)
+        for j in range(POPULATION_SIZE - SELECT_TOP, POPULATION_SIZE):
+            p = np.random.randint(0, SELECT_TOP)
+            q = np.random.randint(0, SELECT_TOP)
+            alpha = np.random.uniform(MIN_ALPHA, MAX_ALPHA)
+            x_new[POPULATION_SIZE * i + j] = single_crossover(
+                x_new[POPULATION_SIZE * i + p], x_new[POPULATION_SIZE * i + q], alpha
+            )
+
+            x_new[POPULATION_SIZE * i + j] = single_mutation(
+                x_new[POPULATION_SIZE * i + j], MUTATION_RATE, sigma_i
+            )
+
+    return x_new
+
+
+@njit
+def switch_best(x_old):
+    x_best = x_old[::POPULATION_SIZE]
+    x_new = x_old.copy()
+
+    for i in range(ISLANDS):
+        j = i + 1
+        if j >= ISLANDS:
+            j = 0
+        x_new[i * POPULATION_SIZE] = x_best[j]
 
     return x_new
 
 
 def init_params():
-    return np.random.uniform(MIN_MATRIX, MAX_MATRIX, (POPULATION_SIZE, NUM_VARS))
+    return np.random.uniform(
+        MIN_MATRIX, MAX_MATRIX, (POPULATION_SIZE * ISLANDS, NUM_VARS)
+    )
 
 
 def print_statistics(iter, fitness):
     print(
         f"Iteration {iter}-{os.getpid()}: Average Fitness {np.mean(fitness)}, Best Fitness {np.max(fitness)}"
+    )
+    print(
+        f"1: {np.max(fitness[:20])}, 2: {np.max(fitness[20:40])}, 3: {np.max(fitness[40:60])}, 4: {np.max(fitness[60:80])}, 5: {np.max(fitness[80:])}"
     )
 
 
@@ -155,6 +186,9 @@ def run_simulation():
         results.append((np.max(fitness), np.mean(fitness), x[np.argmax(fitness)]))
         x = selection_and_generation(x, fitness)
         print_statistics(i, fitness)
+
+        if i % 10 == 0:
+            x = switch_best(x)
 
     os.makedirs(f"data/{EXPERIMENT_NAME}", exist_ok=True)
     pd.DataFrame(results).to_csv(
