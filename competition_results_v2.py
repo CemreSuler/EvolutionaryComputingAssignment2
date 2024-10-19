@@ -30,7 +30,7 @@ if mode == "demo":
     repetitions = 1
     speed = "normal"
     fullscreen = True
-    sound = "on"
+    sound = "off"
 else:
     repetitions = 5
     speed = "fastest"

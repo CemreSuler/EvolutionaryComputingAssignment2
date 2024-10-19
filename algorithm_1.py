@@ -1,6 +1,7 @@
 # NOTE importing Numba to make sure that important calculations happen much faster
 from joblib import Memory
 from numba import njit
+from tqdm.notebook import tqdm
 
 # from tqdm import trange
 
@@ -150,7 +151,7 @@ def run_simulation():
     results.append((np.max(fitness), np.mean(fitness), x[np.argmax(fitness)]))
     x = selection_and_generation(x, fitness)
 
-    for i in range(1, TRAINING_GENERATIONS):
+    for i in tqdm(range(1, TRAINING_GENERATIONS)):
         fitness = run_all_simulations(x)
         results.append((np.max(fitness), np.mean(fitness), x[np.argmax(fitness)]))
         x = selection_and_generation(x, fitness)
@@ -160,7 +161,8 @@ def run_simulation():
     pd.DataFrame(results).to_csv(
         f"data/{EXPERIMENT_NAME}/{int(time.time())}-{os.getpid()}.csv"
     )
-
+    os.makedirs(f"data/{EXPERIMENT_NAME}/competition", exist_ok=True)
+    np.savetxt(f"data/{EXPERIMENT_NAME}/competition/{int(time.time())}-{os.getpid()}-best_individual.txt", x[np.argmax(fitness)])
 
 if __name__ == "__main__":
     run_simulation()

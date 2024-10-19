@@ -165,12 +165,8 @@ def init_params():
 
 def print_statistics(iter, fitness):
     print(
-        f"Iteration {iter}-{os.getpid()}: Average Fitness {np.mean(fitness)}, Best Fitness {np.max(fitness)}"
+        f"1: {np.max(fitness[:50])}, 2: {np.max(fitness[50:100])}, 3: {np.max(fitness[100:150])}, 4: {np.max(fitness[150:200])}, 5: {np.max(fitness[200:])}"
     )
-    print(
-        f"1: {np.max(fitness[:20])}, 2: {np.max(fitness[20:40])}, 3: {np.max(fitness[40:60])}, 4: {np.max(fitness[60:80])}, 5: {np.max(fitness[80:])}"
-    )
-
 
 # FIXME rewrite s.t. fitness is continuously recomputed
 def run_simulation():
@@ -194,7 +190,8 @@ def run_simulation():
     pd.DataFrame(results).to_csv(
         f"data/{EXPERIMENT_NAME}/{int(time.time())}-{os.getpid()}.csv"
     )
-
+    os.makedirs(f"data/{EXPERIMENT_NAME}/competition", exist_ok=True)
+    np.savetxt(f"data/{EXPERIMENT_NAME}/competition/{int(time.time())}-{os.getpid()}-best_individual.txt", x[np.argmax(fitness)])
 
 if __name__ == "__main__":
     run_simulation()
