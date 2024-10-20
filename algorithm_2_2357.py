@@ -25,7 +25,7 @@ NUM_HIDDEN_NEURONS = 10
 POPULATION_SIZE = 50  # NOTE population size per island
 TRAINING_GENERATIONS = 50
 SWITCH_ITERATIONS = 10
-MUTATION_RATE = 0.2
+MUTATION_RATE = 0.5
 SELECT_TOP = 10  # Selects the top to create offspring, kill this part
 ISLANDS = 5
 
