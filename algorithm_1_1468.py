@@ -25,7 +25,7 @@ EXPERIMENT_NAME = "Algorithm1_1468"
 NUM_HIDDEN_NEURONS = 10
 POPULATION_SIZE = 250
 TRAINING_GENERATIONS = 50
-MUTATION_RATE = 0.2
+MUTATION_RATE = 0.5
 SELECT_TOP = 50  # Selects the top to create offspring, kill this part
 
 # Alpha of combination
