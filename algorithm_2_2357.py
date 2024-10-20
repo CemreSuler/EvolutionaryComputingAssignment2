@@ -96,7 +96,7 @@ def single_mutation(x_1, p_mutation, sigma_mutation):
 
     # Perform mutation and clip to ensure that remains in right value range
     return np.clip(
-        np.ceil(r_mutation_prob) * r_mutation_value,
+        x_1 + np.ceil(r_mutation_prob) * r_mutation_value,
         MIN_MATRIX,
         MAX_MATRIX,
     )
@@ -110,7 +110,7 @@ def select_top_p(x, fitness, p):
 
 @njit
 def compute_sigma(fitness):
-    return 1 / (5 * max(1, np.max(fitness) / 10))
+    return 1 / (10 * max(1, np.max(fitness)))
 
 
 # FIXME for now we are just randomly selecting from the top 100
@@ -168,6 +168,7 @@ def print_statistics(iter, fitness):
         f"1: {np.max(fitness[:50])}, 2: {np.max(fitness[50:100])}, 3: {np.max(fitness[100:150])}, 4: {np.max(fitness[150:200])}, 5: {np.max(fitness[200:])}"
     )
 
+
 # FIXME rewrite s.t. fitness is continuously recomputed
 def run_simulation():
     results = [("Best", "Mean", "Best X")]
@@ -191,7 +192,11 @@ def run_simulation():
         f"data/{EXPERIMENT_NAME}/{int(time.time())}-{os.getpid()}.csv"
     )
     os.makedirs(f"data/{EXPERIMENT_NAME}/competition", exist_ok=True)
-    np.savetxt(f"data/{EXPERIMENT_NAME}/competition/{int(time.time())}-{os.getpid()}-best_individual.txt", x[np.argmax(fitness)])
+    np.savetxt(
+        f"data/{EXPERIMENT_NAME}/competition/{int(time.time())}-{os.getpid()}-best_individual.txt",
+        x[np.argmax(fitness)],
+    )
+
 
 if __name__ == "__main__":
     run_simulation()
